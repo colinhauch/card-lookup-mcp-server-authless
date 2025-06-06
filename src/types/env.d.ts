@@ -1,6 +1,6 @@
-interface Env {
+declare interface Env {
     MCP_OBJECT: DurableObjectNamespace;
-    __STATIC_CONTENT?: {
+    ASSETS: {
         fetch: (request: Request) => Promise<Response>;
     };
 }

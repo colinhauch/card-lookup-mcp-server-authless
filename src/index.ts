@@ -180,21 +180,18 @@ export default {
 
 		// Serve static files for non-API routes
 		if (url.pathname === '/' || !url.pathname.startsWith('/api')) {
-			// For the root path, serve index.html
-			if (url.pathname === '/') {
-				const response = await fetch(new URL('/index.html', request.url));
-				if (!response.ok) {
-					return new Response('Not Found', { status: 404 });
+			try {
+				// Handle root path
+				if (url.pathname === '/') {
+					return env.ASSETS.fetch(new Request(new URL('/index.html', request.url)));
 				}
-				return response;
-			}
-			
-			// Try to serve the requested file
-			const response = await fetch(request);
-			if (!response.ok) {
+				
+				// Try to serve the static asset
+				return env.ASSETS.fetch(request);
+			} catch (e) {
+				console.error('Error serving static file:', e);
 				return new Response('Not Found', { status: 404 });
 			}
-			return response;
 		}
 
 		return new Response('Not Found', { status: 404 });

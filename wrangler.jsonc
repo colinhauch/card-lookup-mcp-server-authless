@@ -8,8 +8,8 @@
 	"main": "src/index.ts",
 	"compatibility_date": "2025-03-10",
 	"compatibility_flags": ["nodejs_compat"],
-	"site": {
-		"bucket": "./public"
+	"assets": {
+		"directory": "./public"
 	},
 	"migrations": [
 		{
