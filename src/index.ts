@@ -6,7 +6,7 @@ import { scryfallCardSchema, scryfallListSchema, type ScryfallCard, type Scryfal
 // Define our MCP agent with tools
 export class MyMCP extends McpAgent {
 	server = new McpServer({
-		name: "Authless Calculator",
+		name: "Oracle",
 		version: "1.0.0",
 	});
 
@@ -166,9 +166,10 @@ export class MyMCP extends McpAgent {
 }
 
 export default {
-	fetch(request: Request, env: Env, ctx: ExecutionContext) {
+	async fetch(request: Request, env: Env, ctx: ExecutionContext) {
 		const url = new URL(request.url);
 
+		// Handle API endpoints
 		if (url.pathname === "/sse" || url.pathname === "/sse/message") {
 			return MyMCP.serveSSE("/sse").fetch(request, env, ctx);
 		}
@@ -177,6 +178,25 @@ export default {
 			return MyMCP.serve("/mcp").fetch(request, env, ctx);
 		}
 
-		return new Response("Not found", { status: 404 });
+		// Serve static files for non-API routes
+		if (url.pathname === '/' || !url.pathname.startsWith('/api')) {
+			// For the root path, serve index.html
+			if (url.pathname === '/') {
+				const response = await fetch(new URL('/index.html', request.url));
+				if (!response.ok) {
+					return new Response('Not Found', { status: 404 });
+				}
+				return response;
+			}
+			
+			// Try to serve the requested file
+			const response = await fetch(request);
+			if (!response.ok) {
+				return new Response('Not Found', { status: 404 });
+			}
+			return response;
+		}
+
+		return new Response('Not Found', { status: 404 });
 	},
 };
