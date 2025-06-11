@@ -8,9 +8,6 @@
 	"main": "src/index.ts",
 	"compatibility_date": "2025-03-10",
 	"compatibility_flags": ["nodejs_compat"],
-	"assets": {
-		"directory": "./public"
-	},
 	"migrations": [
 		{
 			"new_sqlite_classes": ["MyMCP"],
