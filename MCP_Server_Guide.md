@@ -6,11 +6,6 @@ This MCP server provides Magic: The Gathering card lookup capabilities using the
 
 ## Available MCP Tools
 
-### 1. `verify-connection`
-- Tests that the MCP connection is working
-- No parameters required
-- Returns: Success message with verification code "MCP25_SUCCESS"
-
 ### 2. `card-search` 
 - Search for multiple cards using Scryfall's search syntax
 - Parameters:
@@ -28,6 +23,13 @@ This MCP server provides Magic: The Gathering card lookup capabilities using the
   - `name` (string): Card name to search for
   - `fuzzy` (boolean, optional): Enable fuzzy matching for misspellings (default: false)
 - Returns: Complete card data in JSON format including all Scryfall properties
+
+### 4. `card-collection`
+- Look up multiple specific cards by name in a single request
+- Parameters:
+  - `cardNames` (array of strings): Array of card names to lookup (maximum 75 cards)
+- Returns: Formatted summary showing found cards with details and any cards that weren't found
+- Example: `["Lightning Bolt", "Counterspell", "Giant Growth"]`
 
 ## How to Use
 
@@ -55,6 +57,7 @@ This MCP server provides Magic: The Gathering card lookup capabilities using the
    - **Test connection**: "Use verify-connection to test the MCP server"
    - **Search for cards**: "Search for red dragons in Magic using card-search"
    - **Look up specific cards**: "Look up 'Lightning Bolt' using card-lookup"
+   - **Look up multiple cards**: "Use card-collection to get details for Lightning Bolt, Counterspell, and Giant Growth"
    - **Complex queries**: "Find the most expensive artifacts in Magic using card-search"
    - **Handle misspellings**: "Look up 'Lightnig Bolt' with fuzzy matching enabled"
 
@@ -85,6 +88,12 @@ Fuzzy: false
 Use card-lookup to find "Lightnig Bolt" with fuzzy matching
 Name: "Lightnig Bolt"
 Fuzzy: true
+```
+
+### Collection Lookup
+```
+Use card-collection to get details for multiple cards
+Card Names: ["Lightning Bolt", "Counterspell", "Giant Growth", "Black Lotus"]
 ```
 
 ## Technical Details

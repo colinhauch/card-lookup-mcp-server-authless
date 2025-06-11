@@ -105,3 +105,18 @@ export const scryfallListSchema = z.object({
 });
 
 export type ScryfallList = z.infer<typeof scryfallListSchema>;
+
+// Schema for a collection response (different from search - total_cards and has_more are not included)
+export const scryfallCollectionSchema = z.object({
+    object: z.literal("list"),
+    data: z.array(scryfallCardSchema),
+    not_found: z.array(z.object({
+        name: z.string().optional(),
+        id: z.string().optional(),
+        set: z.string().optional(),
+        collector_number: z.string().optional(),
+    })).optional(),
+    warnings: z.array(z.string()).optional(),
+});
+
+export type ScryfallCollection = z.infer<typeof scryfallCollectionSchema>;
