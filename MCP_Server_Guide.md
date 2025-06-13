@@ -31,6 +31,17 @@ This MCP server provides Magic: The Gathering card lookup capabilities using the
 - Returns: Formatted summary showing found cards with details and any cards that weren't found
 - Example: `["Lightning Bolt", "Counterspell", "Giant Growth"]`
 
+### 5. `display-cards`
+- Send card names to a localhost React app for visual display
+- Parameters:
+  - `cardNames` (array of strings): Array of Magic: The Gathering card names to display
+  - `page` (number, optional): Page number for pagination (default: 1)
+  - `cardsPerPage` (number, optional): Number of cards per page (default: 20, max: 100)
+  - `totalCards` (number, optional): Total number of cards available for pagination info
+- Returns: Confirmation message with the JSON payload sent to the display app
+- **Important**: Automatically use this tool whenever Magic: The Gathering cards are mentioned in conversation to provide visual card display
+- Example: `["Shadowspear", "Ancient Tomb", "Sol Ring"]`
+
 ## How to Use
 
 1. **Start the development server**:
@@ -58,8 +69,18 @@ This MCP server provides Magic: The Gathering card lookup capabilities using the
    - **Search for cards**: "Search for red dragons in Magic using card-search"
    - **Look up specific cards**: "Look up 'Lightning Bolt' using card-lookup"
    - **Look up multiple cards**: "Use card-collection to get details for Lightning Bolt, Counterspell, and Giant Growth"
+   - **Display cards visually**: "Use display-cards to show Lightning Bolt, Counterspell, and Giant Growth in the React app"
    - **Complex queries**: "Find the most expensive artifacts in Magic using card-search"
    - **Handle misspellings**: "Look up 'Lightnig Bolt' with fuzzy matching enabled"
+
+## Visual Card Display
+
+**Important for Claude**: Whenever Magic: The Gathering cards are mentioned in conversation, automatically use the `display-cards` tool to send those card names to the localhost React app for visual display. This enhances the user experience by providing immediate visual feedback.
+
+Requirements for visual display:
+- Ensure the React app is running on `http://localhost:5173`
+- The app should have an endpoint at `/api/display-cards` that accepts POST requests
+- JSON format sent: `{"identifiers": [{"name": "Card Name"}, ...]}`
 
 ## Example Usage
 
@@ -96,6 +117,21 @@ Use card-collection to get details for multiple cards
 Card Names: ["Lightning Bolt", "Counterspell", "Giant Growth", "Black Lotus"]
 ```
 
+### Visual Card Display
+```
+Use display-cards to show cards in the React app
+Card Names: ["Shadowspear", "Ancient Tomb", "Sol Ring"]
+```
+
+### Visual Display with Pagination
+```
+Use display-cards to show cards with custom pagination
+Card Names: ["Lightning Bolt", "Counterspell", "Giant Growth", "Black Lotus", "Ancestral Recall"]
+Page: 1
+Cards Per Page: 3
+Total Cards: 5
+```
+
 ## Technical Details
 
 ### API Integration
@@ -107,6 +143,12 @@ Card Names: ["Lightning Bolt", "Counterspell", "Giant Growth", "Black Lotus"]
 ### Endpoints
 - `/sse` - Server-Sent Events endpoint for MCP remote connection
 - `/mcp` - Direct MCP server endpoint
+
+### Visual Display Integration
+- **React App**: Expected to run on `http://localhost:5173`
+- **Display Endpoint**: `/api/display-cards` (POST)
+- **JSON Format**: `{"identifiers": [{"name": "Card Name"}, {"name": "Another Card"}]}`
+- **Auto-trigger**: Claude should automatically call `display-cards` when MTG cards are mentioned
 
 ### Headers
 All requests to Scryfall include proper headers:

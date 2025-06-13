@@ -242,6 +242,63 @@ export function registerScryfallTools(server: McpServer): void {
 		}
 	);
 	
+	// Tool to send card names to a localhost endpoint for display
+	server.tool(
+		"display-cards",
+		{
+			cardNames: z.array(z.string()).describe("Array of Magic: The Gathering card names to display in the React app"),
+		},
+		async ({ cardNames }) => {
+			// Format card names into the required JSON pattern
+			const requestBody = {
+				cardNames: cardNames.map(name => name.trim())
+			};
+
+			// Headers for the localhost API request
+			const headers = {
+				'Content-Type': 'application/json',
+				'Accept': 'application/json',
+			};
+
+			try {
+				// Make POST request to localhost endpoint
+				const response = await fetch('http://localhost:5173/api/cards/collection', {
+					method: 'POST',
+					headers,
+					body: JSON.stringify(requestBody)
+				});
+
+				if (!response.ok) {
+					throw new Error(`Localhost API error: ${response.status} - ${response.statusText}`);
+				}
+
+				const responseData = await response.json();
+
+				const resultText = `Successfully sent ${cardNames.length} card names to the display app:\n\n` +
+					`• Cards: ${cardNames.join(', ')}\n` +
+					`\nJSON sent:\n${JSON.stringify(requestBody, null, 2)}\n` +
+					`\nThe cards should now be displayed in your React app at http://localhost:5173`;
+
+				return {
+					content: [
+						{
+							type: "text",
+							text: resultText
+						}
+					]
+				};
+			} catch (error) {
+				if (error instanceof Error) {
+					// Check if it's a connection error to localhost
+					if (error.message.includes('fetch')) {
+						throw new Error('Could not connect to localhost:5173. Make sure your React app is running on port 5173.');
+					}
+					throw error;
+				}
+				throw new Error('An unknown error occurred while sending data to the display app');
+			}
+		}
+	);
 }
 
 // Default export for compatibility
