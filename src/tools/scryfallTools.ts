@@ -48,8 +48,11 @@ export function registerScryfallTools(server: McpServer): void {
 					throw new Error('The card data from Scryfall did not match our expected schema. This might mean the API has changed.');
 				}
 			
+				// Limit results to 20 cards maximum
+				const limitedData = searchResults.data.slice(0, 20);
+				
 				// Format the results into a concise list with card names and permalinks
-				const cardList = searchResults.data.map(card => ({
+				const cardList = limitedData.map(card => ({
 					name: card.name,
 					permalink: `https://scryfall.com/card/${card.set}/${card.collector_number}`,
 					set: card.set_name,
@@ -59,7 +62,7 @@ export function registerScryfallTools(server: McpServer): void {
 
 				const paginationInfo = {
 					total_cards: searchResults.total_cards,
-					has_more: searchResults.has_more,
+					has_more: searchResults.has_more || searchResults.data.length > 20,
 					current_page: page ?? 1,
 					cards_shown: cardList.length,
 				};
@@ -68,11 +71,11 @@ export function registerScryfallTools(server: McpServer): void {
 					content: [
 						{
 							type: "text",
-							text: `Found ${paginationInfo.total_cards} cards matching your search:\n\n` +
+							text: `Found ${paginationInfo.total_cards} cards matching your search (showing first 20):\n\n` +
 								cardList.map(card => 
 									`• ${card.name} (${card.set}) - ${card.type}${card.mana_cost ? ` [${card.mana_cost}]` : ''}\n  Link: ${card.permalink}`
 								).join('\n\n') +
-								(paginationInfo.has_more ? `\n\nShowing cards ${((paginationInfo.current_page - 1) * 175) + 1}-${((paginationInfo.current_page - 1) * 175) + paginationInfo.cards_shown} of ${paginationInfo.total_cards}. Use page parameter to see more results.` : '')
+								(paginationInfo.total_cards > 20 ? `\n\nShowing first 20 cards of ${paginationInfo.total_cards} total results. Use more specific search terms to narrow down results.` : '')
 						}
 					]
 				};
@@ -146,7 +149,7 @@ export function registerScryfallTools(server: McpServer): void {
 		}
 	);
 
-	// Tool that gets multiple cards' details based on a list of card names
+	// Tool that gets one or more cards' details based on a list of card names
 	server.tool(
 		"card-collection",
 		{
@@ -199,11 +202,19 @@ export function registerScryfallTools(server: McpServer): void {
 				
 				// Format the found cards into a concise summary
 				const foundCards = collectionResults.data.map(card => ({
-					name: card.name,
-					permalink: `https://scryfall.com/card/${card.set}/${card.collector_number}`,
-					set: card.set_name,
-					type: card.type_line,
-					...(card.mana_cost && { mana_cost: card.mana_cost })
+					name: card.name
+					// type: card.type_line,
+					// artist: card.artist,
+					// abilities: card.oracle_text,
+					// color_identity: card.color_identity,
+					// rarity: card.rarity,
+					// set_name: card.set_name,
+					// legalities: card.legalities,
+					// permalink: `https://scryfall.com/card/${card.set}/${card.collector_number}`,
+					// ...(card.power && { power: card.power }),
+					// ...(card.toughness && { toughness: card.toughness }),
+					// ...(card.loyalty && { loyalty: card.loyalty }),
+					// ...(card.mana_cost && { mana_cost: card.mana_cost })
 				}));
 
 				const summary = {
@@ -216,7 +227,9 @@ export function registerScryfallTools(server: McpServer): void {
 				
 				if (foundCards.length > 0) {
 					resultText += "Found cards:\n" + foundCards.map(card => 
-						`• ${card.name} (${card.set}) - ${card.type}${card.mana_cost ? ` [${card.mana_cost}]` : ''}\n  Link: ${card.permalink}`
+						`• ${card.name}`
+						// `• ${card.name} (${card.set_name}) - ${card.type}${card.mana_cost ? ` [${card.mana_cost}]` : ''}\n  Link: ${card.permalink}`
+
 					).join('\n\n');
 				}
 
